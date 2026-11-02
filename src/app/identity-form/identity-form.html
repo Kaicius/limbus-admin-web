@@ -1,0 +1,65 @@
+<section class="panel">
+  <header class="panel-head">
+    <h2>Nova <span>Identity</span></h2>
+    <span class="rarity-tag" [class]="'rarity-tag r-' + rarity()">
+      {{ rarity() === 'ZERO' ? '0' : rarity() === 'DOUBLE' ? '00' : '000' }}
+    </span>
+  </header>
+
+  <form (ngSubmit)="save()">
+    <div class="grid">
+      <label>Nome
+        <input [(ngModel)]="name" name="name" placeholder="LCB Sinner Yi Sang" required>
+      </label>
+
+      <label>Raridade
+        <select [(ngModel)]="rarity" name="rarity">
+          <option value="ZERO">0</option>
+          <option value="DOUBLE">00</option>
+          <option value="TRIPLE">000</option>
+        </select>
+      </label>
+
+      <label class="full">Sinner
+        <select [(ngModel)]="sinnerId" name="sinnerId">
+          <option [ngValue]="null" disabled>Escolha...</option>
+          @for (s of sinners(); track s.id) {
+            <option [ngValue]="s.id">{{ s.name }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <div class="files">
+      @for (f of fileFields; track f.key) {
+        <div class="file" [class.done]="urls()[f.key]">
+          <label>{{ f.label }}
+            <input type="file"
+                   [accept]="f.type === 'image' ? 'image/*' : 'video/*'"
+                   (change)="onFile($event, f.key)">
+          </label>
+
+          <div class="preview">
+            @if (urls()[f.key]; as url) {
+              @if (f.type === 'image') {
+                <img [src]="url" alt="">
+              } @else {
+                <video [src]="url" controls></video>
+              }
+            } @else {
+              <span class="empty">{{ f.type === 'image' ? 'Sem imagem' : 'Sem vídeo' }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <button type="submit" class="btn-primary" [disabled]="uploading() > 0">
+      {{ uploading() > 0 ? 'Enviando arquivos...' : 'Registrar Identity' }}
+    </button>
+  </form>
+
+  @if (message()) {
+    <p class="message">{{ message() }}</p>
+  }
+</section>

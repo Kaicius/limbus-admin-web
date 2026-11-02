@@ -1,1 +1,32 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --bg: #0d0a09;
+  --panel: #17110e;
+  --panel2: #1f1612;
+  --line: #3a2a20;
+  --line-strong: #4a3424;
+  --text: #f1e3cc;
+  --muted: #9c8a76;
+  --gold: #f8b400;
+  --hot: #ff8a00;
+  --red: #c0392b;
+  --cream: #e9c9a0;
+  --cut: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at top, #2a140c 0%, transparent 60%),
+    var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans', 'Segoe UI', sans-serif;
+  border-top: 3px solid var(--red);
+}
+
+h1, h2, h3, button, label {
+  font-family: 'Bebas Neue', 'Segoe UI', sans-serif;
+  letter-spacing: 1px;
+}
