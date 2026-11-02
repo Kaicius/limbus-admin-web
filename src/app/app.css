@@ -1,0 +1,55 @@
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.brand-main {
+  font-family: var(--font-title);
+  font-size: 38px;
+  letter-spacing: 2px;
+  color: var(--text);
+}
+
+.brand-sub {
+  font-family: var(--font-title);
+  font-size: 24px;
+  letter-spacing: 1px;
+  color: var(--gold);
+}
+
+.nav { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.nav a {
+  font-family: var(--font-title);
+  font-size: 20px;
+  letter-spacing: 1px;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 6px 18px 4px;
+  border: 1px solid var(--line-strong);
+  background: rgba(0, 0, 0, 0.35);
+  clip-path: var(--cut-sm);
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.nav a:hover { color: var(--cream); border-color: var(--cream); }
+
+.nav a.active {
+  color: var(--bg);
+  background: var(--gold);
+  border-color: var(--gold);
+}

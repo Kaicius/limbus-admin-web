@@ -1,1 +1,14 @@
-<app-identity-form />
+<header class="topbar">
+  <a class="brand" routerLink="/">
+    <span class="brand-main">LIMBUS</span>
+    <span class="brand-sub">Admin</span>
+  </a>
+
+  <nav class="nav">
+    <a routerLink="/identities" routerLinkActive="active">Identities</a>
+    <a routerLink="/egos" routerLinkActive="active">E.G.O.</a>
+    <a routerLink="/banners" routerLinkActive="active">Banners</a>
+  </nav>
+</header>
+
+<router-outlet />

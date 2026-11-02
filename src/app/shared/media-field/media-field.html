@@ -1,0 +1,36 @@
+<div class="file" [class.done]="!!url()" [class.loading]="loading()">
+  <div class="file-head">
+    <span class="file-label">{{ label() }}</span>
+    @if (url() && !loading()) {
+      <button type="button" class="link-btn" (click)="clear()">Remover</button>
+    }
+  </div>
+
+  <input type="file"
+         [accept]="type() === 'image' ? 'image/*' : 'video/*'"
+         (change)="onFile($event)">
+
+  <div class="preview">
+    @if (loading()) {
+      <span class="empty pulse">Enviando...</span>
+    } @else if (url()) {
+      @if (type() === 'image') {
+        <img [src]="url()" alt="">
+      } @else {
+        <video #player [src]="url()" controls muted></video>
+      }
+    } @else {
+      <span class="empty">{{ type() === 'image' ? 'Sem imagem' : 'Sem vídeo' }}</span>
+    }
+  </div>
+
+  @if (pickTime() && type() === 'video' && url() && !loading()) {
+    <button type="button" class="link-btn time-btn" (click)="useCurrentTime()">
+      ⏱ Usar tempo atual como momento da revelação
+    </button>
+  }
+
+  @if (error()) {
+    <span class="file-error">{{ error() }}</span>
+  }
+</div>
