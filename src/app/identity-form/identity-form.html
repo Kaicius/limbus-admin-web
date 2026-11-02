@@ -1,65 +1,127 @@
-<section class="panel">
-  <header class="panel-head">
-    <h2>Nova <span>Identity</span></h2>
-    <span class="rarity-tag" [class]="'rarity-tag r-' + rarity()">
-      {{ rarity() === 'ZERO' ? '0' : rarity() === 'DOUBLE' ? '00' : '000' }}
-    </span>
-  </header>
+<div class="page">
+  <section class="panel">
+    <header class="panel-head">
+      <h2>{{ editingId() === null ? 'Nova' : 'Editar' }} <span>Identity</span></h2>
+      <span class="rarity-tag" [class]="'r-' + rarity()">{{ rarityLabel[rarity()] }}</span>
+    </header>
 
-  <form (ngSubmit)="save()">
-    <div class="grid">
-      <label>Nome
-        <input [(ngModel)]="name" name="name" placeholder="LCB Sinner Yi Sang" required>
-      </label>
+    <form (ngSubmit)="save()">
+      <div class="grid">
+        <label class="field">Nome
+          <input [(ngModel)]="name" name="name"
+                 [placeholder]="suggestedName() || 'Nome da identity'">
+        </label>
 
-      <label>Raridade
-        <select [(ngModel)]="rarity" name="rarity">
-          <option value="ZERO">0</option>
-          <option value="DOUBLE">00</option>
-          <option value="TRIPLE">000</option>
-        </select>
-      </label>
-
-      <label class="full">Sinner
-        <select [(ngModel)]="sinnerId" name="sinnerId">
-          <option [ngValue]="null" disabled>Escolha...</option>
-          @for (s of sinners(); track s.id) {
-            <option [ngValue]="s.id">{{ s.name }}</option>
-          }
-        </select>
-      </label>
-    </div>
-
-    <div class="files">
-      @for (f of fileFields; track f.key) {
-        <div class="file" [class.done]="urls()[f.key]">
-          <label>{{ f.label }}
-            <input type="file"
-                   [accept]="f.type === 'image' ? 'image/*' : 'video/*'"
-                   (change)="onFile($event, f.key)">
-          </label>
-
-          <div class="preview">
-            @if (urls()[f.key]; as url) {
-              @if (f.type === 'image') {
-                <img [src]="url" alt="">
-              } @else {
-                <video [src]="url" controls></video>
-              }
-            } @else {
-              <span class="empty">{{ f.type === 'image' ? 'Sem imagem' : 'Sem vídeo' }}</span>
+        <label class="field">Raridade
+          <select [(ngModel)]="rarity" name="rarity">
+            @for (r of rarities; track r) {
+              <option [ngValue]="r">{{ rarityLabel[r] }}</option>
             }
-          </div>
+          </select>
+        </label>
+
+        <label class="field full">Sinner
+          <select [(ngModel)]="sinnerId" name="sinnerId">
+            <option [ngValue]="null" disabled>Escolha...</option>
+            @for (s of sinners(); track s.id) {
+              <option [ngValue]="s.id">{{ s.name }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      @if (isBase()) {
+        <p class="base-note">
+          Identity 0 (LCB): só a arte. Sem cutscene nem vídeo de obtenção.
+          @if (suggestedName() && !name().trim()) {
+            O nome vai ser salvo como <strong>{{ suggestedName() }}</strong>.
+          }
+        </p>
+        <div class="files">
+          <app-media-field label="Arte" type="image" [(url)]="uptie1" />
+        </div>
+      } @else {
+        <div class="files">
+          <app-media-field label="Arte Uptie 1" type="image" [(url)]="uptie1" />
+          <app-media-field label="Arte Uptie 3" type="image" [(url)]="uptie3" />
+          <app-media-field label="Cutscene Uptie" type="video" [(url)]="cutscene" />
+          <app-media-field label="Vídeo de obtenção" type="video" [(url)]="video"
+                           [pickTime]="true" (timePicked)="revealAt.set($event)" />
+        </div>
+
+        <div class="grid">
+          <label class="field">Momento da revelação (segundos)
+            <input type="number" step="0.1" min="0" [(ngModel)]="revealAt" name="revealAt"
+                   placeholder="vazio = no fim do vídeo">
+          </label>
+          <p class="field-help">
+            Quando aparecem o brilho, o nome e a fala, e pra onde o toque pula.
+            Pause a prévia do vídeo de obtenção no ponto certo e clique em ⏱.
+          </p>
         </div>
       }
-    </div>
 
-    <button type="submit" class="btn-primary" [disabled]="uploading() > 0">
-      {{ uploading() > 0 ? 'Enviando arquivos...' : 'Registrar Identity' }}
-    </button>
-  </form>
+      <label class="field full quote-field">Fala da identity
+        <textarea [(ngModel)]="quote" name="quote" rows="2" maxlength="500"
+                  placeholder="If it is fire you need, then I will provide it."></textarea>
+      </label>
 
-  @if (message()) {
-    <p class="message">{{ message() }}</p>
-  }
-</section>
+      <div class="actions">
+        @if (editingId() !== null) {
+          <button type="button" class="btn-secondary" (click)="reset()">Cancelar</button>
+        }
+        <button type="submit" class="btn-primary" [disabled]="!canSave()">
+          @if (upload.pending() > 0) {
+            Enviando arquivos...
+          } @else if (saving()) {
+            Salvando...
+          } @else {
+            {{ editingId() === null ? 'Registrar Identity' : 'Salvar alterações' }}
+          }
+        </button>
+      </div>
+    </form>
+
+    @if (message()) {
+      <p class="message" [class.error]="isError()">{{ message() }}</p>
+    }
+  </section>
+
+  <section class="panel list-panel">
+    <header class="panel-head">
+      <h2>Registradas <span>{{ items().length }}</span></h2>
+      <div class="chips">
+        <button type="button" class="chip" [class.active]="filter() === 'ALL'" (click)="filter.set('ALL')">Todas</button>
+        @for (r of rarities; track r) {
+          <button type="button" class="chip" [class.active]="filter() === r" (click)="filter.set(r)">{{ rarityLabel[r] }}</button>
+        }
+      </div>
+    </header>
+
+    <ul class="cards">
+      @for (i of visible(); track i.id) {
+        <li class="card" [class.editing]="editingId() === i.id">
+          <div class="thumb">
+            @if (i.uptie1ArtUrl) {
+              <img [src]="i.uptie1ArtUrl" alt="">
+            } @else {
+              ?
+            }
+          </div>
+          <div class="info">
+            <strong>{{ i.name }}</strong>
+            <small>{{ i.sinnerName }}</small>
+          </div>
+          <span class="rarity-tag small" [class]="'r-' + i.rarity">{{ rarityLabel[i.rarity] }}</span>
+          <div class="card-actions">
+            <button type="button" class="link-btn" (click)="edit(i)">Editar</button>
+            <button type="button" class="link-btn danger" (click)="remove(i)">Apagar</button>
+          </div>
+        </li>
+      } @empty {
+        <li class="empty-list">Nenhuma identity aqui ainda.</li>
+      }
+    </ul>
+  </section>
+
+</div>

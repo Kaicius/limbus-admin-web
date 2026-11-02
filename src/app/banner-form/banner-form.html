@@ -1,0 +1,142 @@
+<div class="page">
+  <section class="panel">
+    <header class="panel-head">
+      <h2>{{ editingId() === null ? 'Novo' : 'Editar' }} <span>Banner</span></h2>
+      <div class="summary">
+        <span class="r-ZERO">0 × {{ selectedCount().ZERO }}</span>
+        <span class="r-DOUBLE">00 × {{ selectedCount().DOUBLE }}</span>
+        <span class="r-TRIPLE">000 × {{ selectedCount().TRIPLE }}</span>
+        <span class="r-EGO">EGO × {{ selectedEgos().size }}</span>
+      </div>
+    </header>
+
+    <form (ngSubmit)="save()">
+      <div class="grid">
+        <label class="field">Nome
+          <input [(ngModel)]="name" name="name" placeholder="Extração Padrão" required>
+        </label>
+
+        <label class="field check">
+          <input type="checkbox" [(ngModel)]="active" name="active">
+          Banner ativo
+        </label>
+      </div>
+
+      <div class="thumb-field">
+        <app-media-field label="Thumbnail do banner" type="image" [(url)]="thumbnail" />
+      </div>
+
+      @for (g of groups(); track g.rarity) {
+        <h3 class="section-title">
+          <span>Identities <span [class]="'r-' + g.rarity">{{ rarityLabel[g.rarity] }}</span></span>
+          @if (g.items.length > 0) {
+            <button type="button" class="link-btn" (click)="toggleGroup(g.items)">
+              {{ isGroupFull(g.items) ? 'Desmarcar todas' : 'Marcar todas' }}
+            </button>
+          }
+        </h3>
+
+        <div class="picker">
+          @for (i of g.items; track i.id) {
+            <button type="button" class="pick" [class]="'r-' + i.rarity"
+                    [class.selected]="selectedIdentities().has(i.id)"
+                    (click)="toggleIdentity(i.id)">
+              <span class="pick-art">
+                @if (i.uptie1ArtUrl) {
+                  <img [src]="i.uptie1ArtUrl" alt="">
+                } @else {
+                  {{ rarityLabel[i.rarity] }}
+                }
+              </span>
+              <span class="pick-name">{{ i.name }}</span>
+              <span class="pick-sub">{{ i.sinnerName }}</span>
+            </button>
+          } @empty {
+            <p class="none">Nenhuma identity {{ rarityLabel[g.rarity] }} cadastrada.</p>
+          }
+        </div>
+      }
+
+      <h3 class="section-title">
+        <span>E.G.O. <small>(opcional)</small></span>
+      </h3>
+      <div class="picker">
+        @for (e of allEgos(); track e.id) {
+          <button type="button" class="pick r-EGO"
+                  [class.selected]="selectedEgos().has(e.id)"
+                  (click)="toggleEgo(e.id)">
+            <span class="pick-art">
+              @if (e.artUrl) {
+                <img [src]="e.artUrl" alt="">
+              } @else {
+                EGO
+              }
+            </span>
+            <span class="pick-name">{{ e.name }}</span>
+            <span class="pick-sub">{{ e.sinnerName }}</span>
+          </button>
+        } @empty {
+          <p class="none">Nenhum E.G.O. cadastrado.</p>
+        }
+      </div>
+
+      @if (missingRarities().length > 0) {
+        <p class="hint">Falta escolher pelo menos uma identity de: {{ missingRarities().join(', ') }}</p>
+      }
+
+      <div class="actions">
+        @if (editingId() !== null) {
+          <button type="button" class="btn-secondary" (click)="reset()">Cancelar</button>
+        }
+        <button type="submit" class="btn-primary" [disabled]="!canSave()">
+          @if (upload.pending() > 0) {
+            Enviando arquivos...
+          } @else if (saving()) {
+            Salvando...
+          } @else {
+            {{ editingId() === null ? 'Criar Banner' : 'Salvar alterações' }}
+          }
+        </button>
+      </div>
+    </form>
+
+    @if (message()) {
+      <p class="message" [class.error]="isError()">{{ message() }}</p>
+    }
+  </section>
+
+  <section class="panel list-panel">
+    <header class="panel-head">
+      <h2>Banners <span>{{ items().length }}</span></h2>
+    </header>
+
+    <ul class="cards">
+      @for (b of items(); track b.id) {
+        <li class="banner-card" [class.editing]="editingId() === b.id" [class.off]="!b.active">
+          <div class="banner-thumb">
+            @if (b.thumbnailUrl) {
+              <img [src]="b.thumbnailUrl" alt="">
+            }
+            <span class="status" [class.on]="b.active">{{ b.active ? 'Ativo' : 'Inativo' }}</span>
+          </div>
+          <div class="banner-body">
+            <strong>{{ b.name }}</strong>
+            <div class="counts">
+              <span class="r-ZERO">0 × {{ countByRarity(b, 'ZERO') }}</span>
+              <span class="r-DOUBLE">00 × {{ countByRarity(b, 'DOUBLE') }}</span>
+              <span class="r-TRIPLE">000 × {{ countByRarity(b, 'TRIPLE') }}</span>
+              <span class="r-EGO">EGO × {{ b.egos.length }}</span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button type="button" class="link-btn" (click)="edit(b)">Editar</button>
+            <button type="button" class="link-btn danger" (click)="remove(b)">Apagar</button>
+          </div>
+        </li>
+      } @empty {
+        <li class="empty-list">Nenhum banner criado ainda.</li>
+      }
+    </ul>
+  </section>
+
+</div>

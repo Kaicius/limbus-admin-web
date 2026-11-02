@@ -1,0 +1,81 @@
+<div class="page">
+  <section class="panel">
+    <header class="panel-head">
+      <h2>{{ editingId() === null ? 'Novo' : 'Editar' }} <span>E.G.O.</span></h2>
+      <span class="rarity-tag r-EGO">EGO</span>
+    </header>
+
+    <form (ngSubmit)="save()">
+      <div class="grid">
+        <label class="field">Nome
+          <input [(ngModel)]="name" name="name" placeholder="Crow's Eye View" required>
+        </label>
+
+        <label class="field">Sinner
+          <select [(ngModel)]="sinnerId" name="sinnerId">
+            <option [ngValue]="null" disabled>Escolha...</option>
+            @for (s of sinners(); track s.id) {
+              <option [ngValue]="s.id">{{ s.name }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      <div class="files">
+        <app-media-field label="Arte" type="image" [(url)]="art" />
+        <app-media-field label="Vídeo de obtenção" type="video" [(url)]="video" />
+      </div>
+
+      <div class="actions">
+        @if (editingId() !== null) {
+          <button type="button" class="btn-secondary" (click)="reset()">Cancelar</button>
+        }
+        <button type="submit" class="btn-primary" [disabled]="!canSave()">
+          @if (upload.pending() > 0) {
+            Enviando arquivos...
+          } @else if (saving()) {
+            Salvando...
+          } @else {
+            {{ editingId() === null ? 'Registrar E.G.O.' : 'Salvar alterações' }}
+          }
+        </button>
+      </div>
+    </form>
+
+    @if (message()) {
+      <p class="message" [class.error]="isError()">{{ message() }}</p>
+    }
+  </section>
+
+  <section class="panel list-panel">
+    <header class="panel-head">
+      <h2>Registrados <span>{{ items().length }}</span></h2>
+    </header>
+
+    <ul class="cards">
+      @for (e of items(); track e.id) {
+        <li class="card" [class.editing]="editingId() === e.id">
+          <div class="thumb">
+            @if (e.artUrl) {
+              <img [src]="e.artUrl" alt="">
+            } @else {
+              ?
+            }
+          </div>
+          <div class="info">
+            <strong>{{ e.name }}</strong>
+            <small>{{ e.sinnerName }}</small>
+          </div>
+          <span class="rarity-tag small r-EGO">EGO</span>
+          <div class="card-actions">
+            <button type="button" class="link-btn" (click)="edit(e)">Editar</button>
+            <button type="button" class="link-btn danger" (click)="remove(e)">Apagar</button>
+          </div>
+        </li>
+      } @empty {
+        <li class="empty-list">Nenhum E.G.O. aqui ainda.</li>
+      }
+    </ul>
+  </section>
+
+</div>
