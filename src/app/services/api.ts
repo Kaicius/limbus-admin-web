@@ -75,7 +75,9 @@ export interface BannerRequest {
   egoIds: number[];
 }
 
-const API = 'http://localhost:8080';
+const API = location.hostname === 'localhost'
+  ? 'http://localhost:8080'
+  : 'https://limbus-admin-api.onrender.com';
 
 @Injectable({ providedIn: 'root' })
 export class Api {
